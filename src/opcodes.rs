@@ -147,53 +147,54 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             _ => {}
         }
-    }
 
-    match chip8.opcode & 0xF0FF {
-        0xE09E => {
-            // EX9E - skip next instruction if key in VX is pressed
-            println!("EX9E")
-        },
-        0xE0A1 => {
-            // EXA1 - skip next instruction if key in VX is not pressed
-            println!("EXA1")
-        },
-        0xF007 => {
-            // FX07 - set VX to delay timer value
-            println!("FX07")
-        },
-        0xF00A => {
-            // FX0A - wait for keypress, store in VX
-            println!("FX0A")
-        },
-        0xF015 => {
-            // FX15 - set delay timer to VX
-            println!("FX15")
-        },
-        0xF018 => {
-            // FX18 - set sound timer to VX
-            println!("FX18")
-        },
-        0xF01E => {
-            // FX1E - add VX to I
-            println!("FX1E")
-        },
-        0xF029 => {
-            // FX29 - set I to location of sprite for digit VX
-            println!("FX29")
-        },
-        0xF033 => {
-            // FX33 - store BCD representation of VX in memory locations I, I+1, and I+2
-            println!("FX33")
-        },
-        0xF055 => {
-            // FX55 - store V0 to VX in memory starting at address I
-            println!("FX55")
-        },
-        0xF065 => {
-            // FX65 - read V0 to VX from memory starting at address I
-            println!("FX65")
-        },
-        _ => {}
+        match chip8.opcode & 0xF0FF {
+            0xE09E => {
+                // EX9E - skip next instruction if key in VX is pressed
+                println!("EX9E")
+            },
+            0xE0A1 => {
+                // EXA1 - skip next instruction if key in VX is not pressed
+                println!("EXA1")
+            },
+            0xF007 => {
+                // FX07 - set VX to delay timer value
+                println!("FX07")
+            },
+            0xF00A => {
+                // FX0A - wait for keypress, store in VX
+                println!("FX0A")
+            },
+            0xF015 => {
+                // FX15 - set delay timer to VX
+                println!("FX15")
+            },
+            0xF018 => {
+                // FX18 - set sound timer to VX
+                println!("FX18")
+            },
+            0xF01E => {
+                // FX1E - add VX to I
+                println!("FX1E")
+            },
+            0xF029 => {
+                // FX29 - set I to location of sprite for digit VX
+                println!("FX29")
+            },
+            0xF033 => {
+                // FX33 - store BCD representation of VX in memory locations I, I+1, and I+2
+                println!("FX33")
+            },
+            0xF055 => {
+                // FX55 - store V0 to VX in memory starting at address I
+                println!("FX55")
+            },
+            0xF065 => {
+                // FX65 - read V0 to VX from memory starting at address I
+                println!("FX65")
+            },
+            _ => {}
+        
+        }
     }
 }
