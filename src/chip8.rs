@@ -1,3 +1,5 @@
+use rand::prelude::ThreadRng;
+
 use crate::opcodes::parse_op;
 
 // 0x000-0x1FF - Chip 8 interpreter (contains font set in emu)
@@ -60,12 +62,17 @@ pub struct Chip8 {
     pub sound_timer: u8,
 
     // stack used to remember the current location before a jump is performed.
-    pub jump: [u16; 16],
+    pub jumpstack: [u16; 16],
     // system has 16 levels of stack, to remember which level, a pointer is used.
-    pub stack: u16,
+    pub stackpointer: u16,
 
     // hex based keypad 0x0-0xF
-    pub keystate: [u8; 16]
+    pub keystate: [u8; 16],
+
+    pub display: [u8; 2048],
+
+    // tools
+    pub rng: ThreadRng
 }
 
 impl Chip8 {
@@ -78,9 +85,11 @@ impl Chip8 {
             pc: 0x200,
             delay_timer: 0,
             sound_timer: 0,
-            jump: [0; 16],
-            stack: 0,
+            jumpstack: [0; 16],
+            stackpointer: 0,
             keystate: [0; 16],
+            display: [0; 2048],
+            rng: rand::thread_rng()
         };
         chip8.load_fontset();
         chip8
@@ -100,7 +109,7 @@ impl Chip8 {
     pub fn single_cycle(&mut self) {
         // fetch
         self.opcode = (self.memory[self.pc as usize] as u16) << 8 | (self.memory[(self.pc + 1) as usize] as u16);
-        self.pc = self.pc + 2;
+        self.pc += 2;
 
         // decode - none
         // execute

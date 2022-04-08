@@ -1,24 +1,43 @@
-use std::{fs, fs::File};
-use std::io::Read;
-
 mod chip8;
 mod opcodes;
+mod fstools;
 
+use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
+
+extern crate glium;
 
 fn main() {
     let mut chip8inst = Chip8::new();
     chip8inst.load_program(&get_file_as_byte_vec("./roms/ibm.ch8"));
-    while true {
+
+    use glium::{glutin, Surface};
+
+    let event_loop = glutin::event_loop::EventLoop::new();
+    let wb = glutin::window::WindowBuilder::new();
+    let cb = glutin::ContextBuilder::new();
+    let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+
+    event_loop.run(move |ev, _, control_flow| {
+
+        let mut target = display.draw();
+        target.clear_color(0.0, 0.0, 0.0, 1.0);
+        target.finish().unwrap();
+
         chip8inst.single_cycle();
-    }
-}
+        // let next_frame_time = std::time::Instant::now() +
+        //     std::time::Duration::from_nanos(16_666_667);
 
-fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
-    let mut f = File::open(&filename).expect("no file found");
-    let metadata = fs::metadata(&filename).expect("unable to read metadata");
-    let mut buffer = vec![0; metadata.len() as usize];
-    f.read(&mut buffer).expect("buffer overflow");
-
-    buffer
+        // *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+        match ev {
+            glutin::event::Event::WindowEvent { event, .. } => match event {
+                glutin::event::WindowEvent::CloseRequested => {
+                    *control_flow = glutin::event_loop::ControlFlow::Exit;
+                    return;
+                },
+                _ => return,
+            },
+            _ => (),
+        }
+    });
 }

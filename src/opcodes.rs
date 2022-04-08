@@ -1,58 +1,23 @@
 use crate::chip8::Chip8;
-
-// pub fn parse_op(chip8: &mut Chip8) {
-//     if chip8.opcode != 0 {
-//         match chip8.opcode  {
-//             0x00E0 => println!("CLS"),
-//             0x00EE => {
-//                 // return from subroutine
-//                 println!("RET")
-//             },
-//             0 => {},
-//             _ => {}
-//         }
-        
-//         // matches opcode with last 3 hex digits removed (ie, 0xA22A -> 0xA000)
-//         match chip8.opcode & 0xF000 {
-//             0x1000 => {
-//                 // 1NNN - jump to address NNN
-//                 println!("1NNN")
-//             }
-//             0x2000 => {
-//                 // 2NNN - call subroutine at NNN
-//                 println!("2NNN")
-//             }
-//             0x3000 => {
-//                 // 3XNN - skip next instruction if VX == NN
-//                 println!("3XNN")
-//             }
-//             0x4000 => {
-//                 // 4XNN - skip next instruction if VX != NN
-//                 println!("4XNN")
-//             }
-//             0x6000 => {
-//                 // 6XNN - set VX to NN
-//                 println!("6XNN")
-//             }
-//             0x7000 => {
-//                 // 7XNN - add NN to VX
-//                 println!("7XNN")
-//             }
-//             _ => {}
-//         }
-//     }
-// }
+use rand::{Rng, prelude::ThreadRng};
 
 pub fn parse_op(chip8: &mut Chip8) {
     if chip8.opcode != 0 {
         let x = (chip8.opcode & 0x0F00) >> 8;
         let y = (chip8.opcode & 0x00F0) >> 4;
+        let nn = (chip8.opcode & 0x00FF) as u8;
 
         match chip8.opcode  {
-            0x00E0 => println!("CLS"),
+            0x00E0 => {
+                chip8.display = [0; 2048];
+                return;
+            },
             0x00EE => {
-                // return from subroutine
-                println!("RET")
+                // sets pc to the address at the top of the stack
+                chip8.pc = chip8.jumpstack[chip8.stackpointer as usize];
+                chip8.stackpointer -= 1;
+                println!("RET");
+                return;
             },
             0 => {},
             _ => {}
@@ -60,41 +25,86 @@ pub fn parse_op(chip8: &mut Chip8) {
 
         // matches opcode with last 3 nibbles removed (ie, 0xA22A -> 0xA000)
         match chip8.opcode & 0xF000 {
+            0x0000 => {
+                // ignored by modern interpreters
+                return;
+            },
             0x1000 => {
                 // 1NNN - jump to address NNN
-                println!("1NNN")
+                chip8.pc = chip8.opcode & 0x0FFF;
+                return;
             }
             0x2000 => {
                 // 2NNN - call subroutine at NNN
-                println!("2NNN")
+                chip8.stackpointer += 1;
+                chip8.jumpstack[chip8.stackpointer as usize] = chip8.pc;
+                chip8.pc = chip8.opcode & 0x0FFF;
+                return;
             }
             0x3000 => {
                 // 3XNN - skip next instruction if VX == NN
-                println!("3XNN")
+                if chip8.vregisters[x as usize] == nn {
+                    chip8.pc += 2;
+                }
             }
             0x4000 => {
                 // 4XNN - skip next instruction if VX != NN
-                println!("4XNN")
+                if chip8.vregisters[x as usize] != nn {
+                    chip8.pc += 2;
+                }
+                return;
             }
             0x6000 => {
                 // 6XNN - set VX to NN
-                println!("6XNN")
+                chip8.vregisters[x as usize] = nn;
+                return;
             }
             0x7000 => {
                 // 7XNN - add NN to VX
-                println!("7XNN")
+                chip8.vregisters[x as usize] += nn;
+                return;
             },
             0xA000 => {
-
+                // ANNN - set I to NNN
+                chip8.i = chip8.opcode & 0x0FFF;
+                return;
             },
             0xB000 => {
-
+                // BNNN - jump to address NNN + V0
+                chip8.pc = (chip8.opcode & 0x0FFF) + chip8.vregisters[0] as u16;
+                return;
             },
             0xC000 => {
-
+                // CXNN - set VX to random byte ANDed with NN
+                chip8.vregisters[x as usize] = nn & chip8.rng.gen::<u8>();
+                return;
             },
             0xD000 => {
+                // DXYN - draw sprite at VX, VY with N bytes of sprite data starting at I
+                let vx = chip8.vregisters[x as usize];
+                let vy = chip8.vregisters[y as usize];
 
+                let mut heightbytes = chip8.opcode & 0x000F;
+                if heightbytes == 0 {
+                    heightbytes = 16;
+                }
+
+                for yline in 0..heightbytes {
+                    let wy = (vy as u16 + yline) % 32;
+
+                    let line = chip8.memory[(chip8.i + yline) as usize];
+
+                    for xline in 0..8 {
+                        let wx = (vx as u16 + xline) % 64;
+                        if (line & 0x80) > 0 {
+                            if (chip8.display[(wy + wx * 32) as usize]) == 1 {
+                                chip8.vregisters[15] = 1;
+                            }
+                            chip8.display[(wy + wx * 32) as usize] ^= 1;
+                        }
+                    }
+                }
+                return;
             },
             _ => {}
         }
