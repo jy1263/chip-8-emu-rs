@@ -1,0 +1,114 @@
+use crate::opcodes::parse_op;
+
+// 0x000-0x1FF - Chip 8 interpreter (contains font set in emu)
+// 0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)
+// 0x200-0xFFF - Program ROM and work RAM
+
+static KEYMAP: [u8; 16] = [
+    0x1, // 1
+    0x2, // 2
+    0x3, // 3
+    0xC, // C
+    0x4, // 4
+    0x5, // 5
+    0x6, // 6
+    0xD, // D
+    0x7, // 7
+    0x8, // 8
+    0x9, // 9
+    0xE, // E
+    0xA, // A
+    0x0, // 0
+    0xB, // B
+    0xF, // F
+];
+
+static FONTSET: [u8; 80] = [
+	0xF0, 0x90, 0x90, 0x90, 0xF0,		// 0
+	0x20, 0x60, 0x20, 0x20, 0x70,		// 1
+	0xF0, 0x10, 0xF0, 0x80, 0xF0,		// 2
+	0xF0, 0x10, 0xF0, 0x10, 0xF0,		// 3
+	0x90, 0x90, 0xF0, 0x10, 0x10,		// 4
+	0xF0, 0x80, 0xF0, 0x10, 0xF0,		// 5
+	0xF0, 0x80, 0xF0, 0x90, 0xF0,		// 6
+	0xF0, 0x10, 0x20, 0x40, 0x40,		// 7
+	0xF0, 0x90, 0xF0, 0x90, 0xF0,		// 8
+	0xF0, 0x90, 0xF0, 0x10, 0xF0,		// 9
+	0xF0, 0x90, 0xF0, 0x90, 0x90,		// A
+	0xE0, 0x90, 0xE0, 0x90, 0xE0,		// B
+	0xF0, 0x80, 0x80, 0x80, 0xF0,		// C
+	0xE0, 0x90, 0x90, 0x90, 0xE0,		// D
+	0xF0, 0x80, 0xF0, 0x80, 0xF0,		// E
+	0xF0, 0x80, 0xF0, 0x80, 0x80		// F
+];
+
+pub struct Chip8 {
+    
+    // current opcode
+    pub opcode: u16,
+    pub memory: [u8; 4096],
+
+    // V registers
+    pub vregisters: [u8; 16],
+
+    // index register and program counter (pc)
+    pub i: u16,
+    pub pc: u16,
+
+    // interupts and hardware registers
+    pub delay_timer: u8,
+    pub sound_timer: u8,
+
+    // stack used to remember the current location before a jump is performed.
+    pub jump: [u16; 16],
+    // system has 16 levels of stack, to remember which level, a pointer is used.
+    pub stack: u16,
+
+    // hex based keypad 0x0-0xF
+    pub keystate: [u8; 16]
+}
+
+impl Chip8 {
+    pub fn new() -> Self {
+        let mut chip8 = Chip8 {
+            opcode: 0,
+            memory: [0; 4096],
+            vregisters: [0; 16],
+            i: 0,
+            pc: 0x200,
+            delay_timer: 0,
+            sound_timer: 0,
+            jump: [0; 16],
+            stack: 0,
+            keystate: [0; 16],
+        };
+        chip8.load_fontset();
+        chip8
+    }
+    fn load_fontset(&mut self) {
+        for i in 0..80 {
+            self.memory[i] = FONTSET[i];
+        }
+    }
+    pub fn load_program(&mut self, program: &Vec<u8>) {
+        for i in 0..program.len() {
+            self.memory[0x200 + i] = program[i];
+        }
+    }
+
+
+    pub fn single_cycle(&mut self) {
+        // fetch
+        self.opcode = (self.memory[self.pc as usize] as u16) << 8 | (self.memory[(self.pc + 1) as usize] as u16);
+        self.pc = self.pc + 2;
+
+        // decode - none
+        // execute
+        self.execute();
+
+        // store
+    }
+    fn execute(&mut self) {
+        parse_op(self);
+    }
+}
