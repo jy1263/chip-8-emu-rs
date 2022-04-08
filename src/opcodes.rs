@@ -81,30 +81,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xD000 => {
                 // DXYN - draw sprite at VX, VY with N bytes of sprite data starting at I
-                let vx = chip8.vregisters[x as usize];
-                let vy = chip8.vregisters[y as usize];
-
-                let mut heightbytes = chip8.opcode & 0x000F;
-                if heightbytes == 0 {
-                    heightbytes = 16;
-                }
-
-                for yline in 0..heightbytes {
-                    let wy = (vy as u16 + yline) % 32;
-
-                    let line = chip8.memory[(chip8.i + yline) as usize];
-
-                    for xline in 0..8 {
-                        let wx = (vx as u16 + xline) % 64;
-                        if (line & 0x80) > 0 {
-                            if (chip8.display[(wy + wx * 32) as usize]) == 1 {
-                                chip8.vregisters[15] = 1;
-                            }
-                            chip8.display[(wy + wx * 32) as usize] ^= 1;
-                        }
-                    }
-                }
-                return;
+                // I have no idea how to implement this!
             },
             _ => {}
         }

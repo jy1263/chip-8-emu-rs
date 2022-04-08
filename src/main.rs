@@ -2,6 +2,8 @@ mod chip8;
 mod opcodes;
 mod fstools;
 
+use glium::texture;
+
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
 
@@ -19,12 +21,17 @@ fn main() {
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     event_loop.run(move |ev, _, control_flow| {
+        chip8inst.single_cycle();
+        let texture = glium::Texture2d::new(&display,
+            vec![
+            vec![(0u8, 1u8, 2u8), (4u8, 8u8, 16u8), (4u8, 8u8, 16u8), (4u8, 8u8, 16u8)]
+        ]).unwrap();
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
+        texture.as_surface().fill(&target, glium::uniforms::MagnifySamplerFilter::Nearest);
         target.finish().unwrap();
-
-        chip8inst.single_cycle();
+        
         // let next_frame_time = std::time::Instant::now() +
         //     std::time::Duration::from_nanos(16_666_667);
 
