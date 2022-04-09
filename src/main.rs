@@ -1,6 +1,7 @@
 mod chip8;
 mod opcode_parser;
 mod fstools;
+mod input;
 
 use glium::glutin::event::{VirtualKeyCode, ElementState};
 
@@ -26,7 +27,7 @@ fn main() {
         let next_frame_time = std::time::Instant::now() +std::time::Duration::from_millis(2);
 
         // timer stuff
-        if runtimes >= 8 {
+        if runtimes >= 7 {
             if chip8inst.delay_timer > 0 {
                 chip8inst.delay_timer -= 1;
             }
@@ -66,37 +67,7 @@ fn main() {
                 },
                 glutin::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
-                    let pressed = (input.state == ElementState::Pressed) as u8;
-                    match input.virtual_keycode.unwrap() {
-                        VirtualKeyCode::Key1=> {
-                            chip8inst.keystate[0x1] = pressed;
-                        },
-                        VirtualKeyCode::Key2=> {
-                            chip8inst.keystate[0x2] = pressed;
-                        },
-                        VirtualKeyCode::Key3=> {
-                            chip8inst.keystate[0x3] = pressed;
-                        },
-                        VirtualKeyCode::Key4=> {
-                            chip8inst.keystate[0xC] = pressed;
-                        },
-
-                        VirtualKeyCode::Q=> {
-                            chip8inst.keystate[0x4] = pressed;
-                        },
-                        VirtualKeyCode::W=> {
-                            chip8inst.keystate[0x5] = pressed;
-                        },
-                        VirtualKeyCode::E=> {
-                            chip8inst.keystate[0x6] = pressed;
-                        },
-                        VirtualKeyCode::R=> {
-                            chip8inst.keystate[0xD] = pressed;
-                        },
-
-
-                        _ => {}
-                    }
+                    crate::input::parse_input(input, &mut chip8inst);
                 },
                 _ => return,
             },
