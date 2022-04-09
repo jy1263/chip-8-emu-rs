@@ -246,10 +246,9 @@ pub fn parse_op(chip8: &mut Chip8) {
                     chip8.vregisters[x] = key as u8;
                 },
                 None => {
+                    chip8.pc -= 2;
                 }
             }
-
-            chip8.pc -= 2;
             return;
         },
         0xF015 => {
