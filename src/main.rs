@@ -11,8 +11,9 @@ fn main() {
     let mut chip8inst = Chip8::new();
     chip8inst.load_program(&get_file_as_byte_vec("./roms/si.ch8"));
 
-    use glium::{glutin, Surface};
+    let mut runtimes = 0;
 
+    use glium::{glutin, Surface};
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
@@ -21,6 +22,20 @@ fn main() {
     event_loop.run(move |ev, _, control_flow| {
         // set next run time to 1 second / 500hz =  2 milliseconds.
         let next_frame_time = std::time::Instant::now() +std::time::Duration::from_millis(2);
+
+        // timer stuff
+        if runtimes >= 8 {
+            if chip8inst.delay_timer > 0 {
+                chip8inst.delay_timer -= 1;
+            }
+            if chip8inst.sound_timer > 0 {
+                chip8inst.delay_timer -= 1;
+            }
+            runtimes = 0;
+        }
+        else {
+            runtimes += 1;
+        }
 
         // cycle cpu
         chip8inst.single_cycle();
