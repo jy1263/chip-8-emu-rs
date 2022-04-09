@@ -2,8 +2,8 @@ use crate::chip8::Chip8;
 use rand::{Rng, prelude::ThreadRng};
 
 pub fn parse_op(chip8: &mut Chip8) {
-    let x = (chip8.opcode & 0x0F00) >> 8;
-    let y = (chip8.opcode & 0x00F0) >> 4;
+    let x = ((chip8.opcode & 0x0F00) >> 8) as usize;
+    let y = ((chip8.opcode & 0x00F0) >> 4) as usize;
     let nn = (chip8.opcode & 0x00FF) as u8;
 
     println!("{:X}", chip8.opcode);
@@ -43,25 +43,25 @@ pub fn parse_op(chip8: &mut Chip8) {
         }
         0x3000 => {
             // 3XNN - skip next instruction if VX == NN
-            if chip8.vregisters[x as usize] == nn {
+            if chip8.vregisters[x] == nn {
                 chip8.pc += 2;
             }
         }
         0x4000 => {
             // 4XNN - skip next instruction if VX != NN
-            if chip8.vregisters[x as usize] != nn {
+            if chip8.vregisters[x] != nn {
                 chip8.pc += 2;
             }
             return;
         }
         0x6000 => {
             // 6XNN - set VX to NN
-            chip8.vregisters[x as usize] = nn;
+            chip8.vregisters[x] = nn;
             return;
         }
         0x7000 => {
             // 7XNN - add NN to VX
-            chip8.vregisters[x as usize] = chip8.vregisters[x as usize].wrapping_add(nn);
+            chip8.vregisters[x] = chip8.vregisters[x].wrapping_add(nn);
             return;
         },
         0xA000 => {
@@ -76,7 +76,7 @@ pub fn parse_op(chip8: &mut Chip8) {
         },
         0xC000 => {
             // CXNN - set VX to random byte ANDed with NN
-            chip8.vregisters[x as usize] = nn & chip8.rng.gen::<u8>();
+            chip8.vregisters[x] = nn & chip8.rng.gen::<u8>();
             return;
         },
         0xD000 => {
@@ -85,8 +85,8 @@ pub fn parse_op(chip8: &mut Chip8) {
             let nbytes = chip8.opcode & 0x000F;
 
             // vregisters at x and y
-            let vx = chip8.vregisters[x as usize];
-            let vy = chip8.vregisters[y as usize];
+            let vx = chip8.vregisters[x];
+            let vy = chip8.vregisters[y];
 
             // set last register to 0
             chip8.vregisters[0xF] = 0;
@@ -126,91 +126,91 @@ pub fn parse_op(chip8: &mut Chip8) {
     match chip8.opcode & 0xF00F {
         0x5000 => {
             // 5XY0 - skip next instruction if VX == VY
-            if chip8.vregisters[x as usize] == chip8.vregisters[y as usize] {
+            if chip8.vregisters[x] == chip8.vregisters[y] {
                 chip8.pc += 2;
             }
             return;
         },
         0x8000 => {
             // 8XY0 - set VX to VY
-            chip8.vregisters[x as usize] = chip8.vregisters[y as usize];
+            chip8.vregisters[x] = chip8.vregisters[y];
             return;
         },
         0x8001 => {
             // 8XY1 - set VX to VX | VY
-            chip8.vregisters[x as usize] |= chip8.vregisters[y as usize];
+            chip8.vregisters[x] |= chip8.vregisters[y];
             return;
         },
         0x8002 => {
             // 8XY2 - set VX to VX & VY
-            chip8.vregisters[x as usize] &= chip8.vregisters[y as usize];
+            chip8.vregisters[x] &= chip8.vregisters[y];
             return;
         },
         0x8003 => {
             // 8XY3 - set VX to VX ^ VY
-            chip8.vregisters[x as usize] ^= chip8.vregisters[y as usize];
+            chip8.vregisters[x] ^= chip8.vregisters[y];
             return;
         },
         0x8004 => {
             // 8XY4 - set VF to 1 if carry, set VX to VX + VY
 
             // Checks if the hex nibbles plussed together uses more than 8 bits, meaning it has carried over.
-            let result = chip8.vregisters[x as usize] as u16 + chip8.vregisters[y as usize] as u16;
+            let result = chip8.vregisters[x] as u16 + chip8.vregisters[y] as u16;
             if result > 0x00FF {
                 chip8.vregisters[0xF] = 1;
             }
             else {
                 chip8.vregisters[0xF] = 0;
             }
-            chip8.vregisters[x as usize] = result as u8;
+            chip8.vregisters[x] = result as u8;
             return;
         },
         0x8005 => {
             // 8XY5 - set VF to 0 if borrow, set VX to VX - VY
-            if chip8.vregisters[x as usize] > chip8.vregisters[y as usize] {
+            if chip8.vregisters[x] > chip8.vregisters[y] {
                 chip8.vregisters[0xF] = 1;
             }
             else {
                 chip8.vregisters[0xF] = 0;
             }
 
-            chip8.vregisters[x as usize] -= chip8.vregisters[y as usize];
+            chip8.vregisters[x] -= chip8.vregisters[y];
             return;
         },
         0x8006 => {
             // 8XY6 - set VF to LSB of VX, set VX to VX >> 1
 
             // Set VF to least significant bit of VX
-            chip8.vregisters[0xF] = chip8.vregisters[x as usize] & 0x01;
+            chip8.vregisters[0xF] = chip8.vregisters[x] & 0x01;
 
-            chip8.vregisters[x as usize] >>= 1;
+            chip8.vregisters[x] >>= 1;
 
             return;
         },
         0x8007 => {
             // 8XY7 - set VX to VY - VX, set VF to 0 if borrow
-            if chip8.vregisters[y as usize] > chip8.vregisters[x as usize] {
+            if chip8.vregisters[y] > chip8.vregisters[x] {
                 chip8.vregisters[0xF] = 1;
             }
             else {
                 chip8.vregisters[0xF] = 0;
             }
 
-            chip8.vregisters[x as usize] -= chip8.vregisters[y as usize];
+            chip8.vregisters[x] -= chip8.vregisters[y];
             return;
         },
         0x800E => {
             // 8XYE - set VX to VX << 1, set VF to MSB of VX
 
             // set registers by pushing unneeded bits off, and leaving with the MSB
-            chip8.vregisters[0xF] = chip8.vregisters[x as usize] >> 7;
+            chip8.vregisters[0xF] = chip8.vregisters[x] >> 7;
 
-            chip8.vregisters[x as usize] <<= 1;
+            chip8.vregisters[x] <<= 1;
             return;
         },
         0x9000 => {
             // 9XY0 - skip next instruction if VX != VY
-            if chip8.vregisters[x as usize] != chip8.vregisters[y as usize] {
+            if chip8.vregisters[x] != chip8.vregisters[y] {
                 chip8.pc += 2;
             }
             return;
@@ -221,21 +221,21 @@ pub fn parse_op(chip8: &mut Chip8) {
     match chip8.opcode & 0xF0FF {
         0xE09E => {
             // EX9E - skip next instruction if key in VX is pressed
-            if chip8.keystate[chip8.vregisters[x as usize] as usize] != 0 {
+            if chip8.keystate[chip8.vregisters[x] as usize] != 0 {
                 chip8.pc += 2;
             }
             return;
         },
         0xE0A1 => {
             // EXA1 - skip next instruction if key in VX is not pressed
-            if chip8.keystate[chip8.vregisters[x as usize] as usize] == 0 {
+            if chip8.keystate[chip8.vregisters[x] as usize] == 0 {
                 chip8.pc += 2;
             }
             return;
         },
         0xF007 => {
             // FX07 - set VX to delay timer value
-            chip8.vregisters[x as usize] = chip8.delay_timer;
+            chip8.vregisters[x] = chip8.delay_timer;
             return;
         },
         0xF00A => {
@@ -243,7 +243,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             // todo: maybe broken!
             match chip8.keystate.iter().position(|&x| x != 0) {
                 Some(key) => {
-                    chip8.vregisters[x as usize] = key as u8;
+                    chip8.vregisters[x] = key as u8;
                 },
                 None => {
                 }
@@ -254,23 +254,23 @@ pub fn parse_op(chip8: &mut Chip8) {
         },
         0xF015 => {
             // FX15 - set delay timer to VX
-            chip8.delay_timer = chip8.vregisters[x as usize];
+            chip8.delay_timer = chip8.vregisters[x];
             return;
         },
         0xF018 => {
             // FX18 - set sound timer to VX
-            chip8.sound_timer = chip8.vregisters[x as usize];
+            chip8.sound_timer = chip8.vregisters[x];
             return;
         },
         0xF01E => {
             // FX1E - add VX to I, set to I
-            chip8.i += chip8.vregisters[x as usize] as u16;
+            chip8.i += chip8.vregisters[x] as u16;
             return;
         },
         0xF029 => {
             // FX29 - set I to location of sprite for digit VX
             // multiplied by 5, as each sprite is 5 bytes long
-            chip8.i = chip8.vregisters[x as usize] as u16 * 5;
+            chip8.i = chip8.vregisters[x] as u16 * 5;
             return;
         },
         0xF033 => {
@@ -280,14 +280,14 @@ pub fn parse_op(chip8: &mut Chip8) {
         0xF055 => {
             // FX55 - store V0 to VX in memory starting at address I
             for index in 0..x {
-                chip8.memory[(chip8.i + index) as usize] = chip8.vregisters[index as usize];
+                chip8.memory[chip8.i as usize + index] = chip8.vregisters[index];
             }
             return;
         },
         0xF065 => {
             // FX65 - read V0 to VX from memory starting at address I
             for index in 0..x {
-                chip8.vregisters[index as usize] = chip8.memory[(chip8.i + index) as usize];
+                chip8.vregisters[index] = chip8.memory[chip8.i as usize + index];
             }
             return;
         },
