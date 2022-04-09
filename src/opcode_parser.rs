@@ -6,7 +6,7 @@ pub fn parse_op(chip8: &mut Chip8) {
     let y = ((chip8.opcode & 0x00F0) >> 4) as usize;
     let nn = (chip8.opcode & 0x00FF) as u8;
 
-    println!("{:X}", chip8.opcode);
+    // println!("{:X}", chip8.opcode);
     match chip8.opcode  {
         0x00E0 => {
             chip8.display = [0; 2048];
@@ -274,7 +274,10 @@ pub fn parse_op(chip8: &mut Chip8) {
         },
         0xF033 => {
             // FX33 - store BCD representation of VX in memory locations I, I+1, and I+2
-            println!("FX33")
+            chip8.memory[chip8.i as usize] = (chip8.vregisters[x] / 100) % 10;
+            chip8.memory[(chip8.i + 1) as usize] = (chip8.vregisters[x] / 10) % 10;
+            chip8.memory[(chip8.i + 2) as usize] = chip8.vregisters[x] % 10;
+            return;
         },
         0xF055 => {
             // FX55 - store V0 to VX in memory starting at address I
