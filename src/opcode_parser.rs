@@ -222,11 +222,17 @@ pub fn parse_op(chip8: &mut Chip8) {
         match chip8.opcode & 0xF0FF {
             0xE09E => {
                 // EX9E - skip next instruction if key in VX is pressed
-                println!("EX9E")
+                if chip8.keystate[chip8.vregisters[x as usize] as usize] != 0 {
+                    chip8.pc += 2;
+                }
+                return;
             },
             0xE0A1 => {
                 // EXA1 - skip next instruction if key in VX is not pressed
-                println!("EXA1")
+                if chip8.keystate[chip8.vregisters[x as usize] as usize] == 0 {
+                    chip8.pc += 2;
+                }
+                return;
             },
             0xF007 => {
                 // FX07 - set VX to delay timer value
@@ -245,8 +251,9 @@ pub fn parse_op(chip8: &mut Chip8) {
                 println!("FX18")
             },
             0xF01E => {
-                // FX1E - add VX to I
-                println!("FX1E")
+                // FX1E - add VX to I, set to I
+                chip8.i = chip8.vregisters[x as usize] as u16 + chip8.i;
+                return;
             },
             0xF029 => {
                 // FX29 - set I to location of sprite for digit VX
