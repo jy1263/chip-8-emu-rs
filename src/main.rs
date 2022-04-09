@@ -2,8 +2,6 @@ mod chip8;
 mod opcode_parser;
 mod fstools;
 
-use glium::texture;
-
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
 
@@ -24,10 +22,10 @@ fn main() {
         chip8inst.single_cycle();
         
         // render frame
-        let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
+        let mut disptexturevec = vec![vec![(0, 0, 0); 64]; 32];
         for (i, e) in  chip8inst.display.iter().enumerate() {
             if *e == 1 {
-                disptexturevec[32 - (i % 32)][i / 32] = (255u8, 255u8, 255u8);
+                disptexturevec[32 - (i % 32)][i / 32] = (255, 255, 255);
             }
         }
         let texture = glium::Texture2d::new(&display, disptexturevec).unwrap();
