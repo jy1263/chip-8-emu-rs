@@ -14,7 +14,6 @@ extern crate glium;
 fn main() {
     // args
     let flags = crate::args::parse_args();
-    println!("{}, {}, {}", flags.bg.r, flags.bg.g, flags.bg.b);
 
     // setup speed
     let runhz:u64 = flags.hz;
