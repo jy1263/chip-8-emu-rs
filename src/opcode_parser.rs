@@ -264,7 +264,7 @@ pub fn parse_op(chip8: &mut Chip8) {
         },
         0xF01E => {
             // FX1E - add VX to I, set to I
-            chip8.i = chip8.vregisters[x as usize] as u16 + chip8.i;
+            chip8.i += chip8.vregisters[x as usize] as u16;
             return;
         },
         0xF029 => {
