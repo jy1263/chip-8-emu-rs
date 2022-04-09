@@ -94,17 +94,18 @@ pub fn parse_op(chip8: &mut Chip8) {
                     // get the sprite from memory
                     let mut sprt = chip8.memory[(chip8.i + row) as usize];
 
-                    let wy = (vy as u16 + row) % 32;
                     for col in 0..width {
-                        let wx = (vx as u16 + col) % 64;
-
                         // if the sprite is not 0, toggle pixel.
                         if sprt & 0x0080 > 0 {
-
-                            if chip8.display[(wy + wx * 32) as usize] == 1 {
+                            let disppixel = &mut chip8.display[(
+                                (vy as u16 + row) % 32 + 
+                                (vx as u16 + col) % 64 * 
+                                32
+                            ) as usize];
+                            if *disppixel == 1 {
                                 chip8.vregisters[15] = 1;
                             }
-                            chip8.display[(wy + wx * 32) as usize] ^= 1;
+                            *disppixel ^= 1;
                         }
 
                         // shift the sprite to the right to be ready for next draw
