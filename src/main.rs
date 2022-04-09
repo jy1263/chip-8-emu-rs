@@ -13,6 +13,10 @@ use crate::input::parse_input;
 extern crate glium;
 
 fn main() {
+    let runhz:u64 = 100;
+    let delay:u64 = 1000/runhz;
+    let satisfiedruntimes: u64 = (1000/60)/delay;
+
     let mut chip8inst = Chip8::new();
     chip8inst.load_program(&get_file_as_byte_vec("./roms/bo.ch8"));
 
@@ -26,10 +30,11 @@ fn main() {
 
     event_loop.run(move |ev, _, control_flow| {
         // set next run time to 1 second / 500hz =  2 milliseconds.
-        let next_frame_time = std::time::Instant::now() +std::time::Duration::from_millis(2);
+        let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
 
         // timer stuff
-        if runtimes >= 7 {
+        if runtimes >= satisfiedruntimes {
+            render_texture_to_target(&chip8inst.display, &display);
             if chip8inst.delay_timer > 0 {
                 chip8inst.delay_timer -= 1;
             }
@@ -38,16 +43,12 @@ fn main() {
             }
             runtimes = 0;
         }
-        else {
-            runtimes += 1;
-        }
+        runtimes += 1;
 
         // cycle cpu
         chip8inst.single_cycle();
         
-        render_texture_to_target(&chip8inst.display, &display);
-
-        *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+        // *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
         match ev {
             glutin::event::Event::WindowEvent { event, .. } => match event {
                 glutin::event::WindowEvent::CloseRequested => {
@@ -69,8 +70,8 @@ fn render_texture_to_target(dispmem: &[u8; 2048], display: &glium::Display) {
     use crate::glium::Surface;
 
     let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
-    for (i, e) in  dispmem.iter().enumerate() {
-        if *e == 1 {
+    for i in  0..dispmem.len() {
+        if dispmem[i] == 1 {
             disptexturevec[31 - (i % 32)][i / 32] = (255u8, 255u8, 255u8);
         }
     }

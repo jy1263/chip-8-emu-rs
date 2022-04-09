@@ -160,7 +160,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             else {
                 chip8.vregisters[0xF] = 0;
             }
-            chip8.vregisters[x] = result as u8;
+            chip8.vregisters[x] = chip8.vregisters[x].wrapping_add(chip8.vregisters[y]);
             return;
         },
         0x8005 => {
@@ -172,7 +172,7 @@ pub fn parse_op(chip8: &mut Chip8) {
                 chip8.vregisters[0xF] = 0;
             }
 
-            chip8.vregisters[x] -= chip8.vregisters[y];
+            chip8.vregisters[x] = chip8.vregisters[x].wrapping_sub(chip8.vregisters[y]);
             return;
         },
         0x8006 => {
