@@ -18,11 +18,11 @@ fn main() {
     let satisfiedruntimes: u64 = (1000/60)/delay;
 
     let mut chip8inst = Chip8::new();
-    chip8inst.load_program(&get_file_as_byte_vec("./roms/bo.ch8"));
+    chip8inst.load_program(&get_file_as_byte_vec("./roms/si.ch8"));
 
     let mut runtimes = 0;
 
-    use glium::{glutin, Surface};
+    use glium::glutin;
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
@@ -48,7 +48,7 @@ fn main() {
         // cycle cpu
         chip8inst.single_cycle();
         
-        // *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+        *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
         match ev {
             glutin::event::Event::WindowEvent { event, .. } => match event {
                 glutin::event::WindowEvent::CloseRequested => {
