@@ -22,10 +22,14 @@ fn main() {
 
     event_loop.run(move |ev, _, control_flow| {
         chip8inst.single_cycle();
-        let texture = glium::Texture2d::new(&display,
-            vec![
-            vec![(0u8, 1u8, 2u8), (4u8, 8u8, 16u8), (4u8, 8u8, 16u8), (4u8, 8u8, 16u8)]
-        ]).unwrap();
+        
+        let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
+        for (i, e) in  chip8inst.display.iter().enumerate() {
+            if *e == 1 {
+                disptexturevec[i % 32][i / 32] = (255u8, 255u8, 255u8);
+            }
+        }
+        let texture = glium::Texture2d::new(&display, disptexturevec).unwrap();
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);

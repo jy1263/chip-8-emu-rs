@@ -88,7 +88,7 @@ impl Chip8 {
             jumpstack: [0; 16],
             stackpointer: 0,
             keystate: [0; 16],
-            display: [0; 2048],
+            display: [1; 2048],
             rng: rand::thread_rng()
         };
         chip8.load_fontset();
