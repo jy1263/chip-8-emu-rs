@@ -95,16 +95,20 @@ pub fn parse_op(chip8: &mut Chip8) {
                     let mut sprt = chip8.memory[(chip8.i + row) as usize];
 
                     for col in 0..width {
-                        // if the sprite is not 0, toggle pixel.
+                        // if the sprite is not 0
                         if sprt & 0x0080 > 0 {
                             let disppixel = &mut chip8.display[(
                                 (vy as u16 + row) % 32 + 
                                 (vx as u16 + col) % 64 * 
                                 32
                             ) as usize];
+
+                            // set top register to 1 if pixel is set
                             if *disppixel == 1 {
                                 chip8.vregisters[15] = 1;
                             }
+
+                            // toggle pixel
                             *disppixel ^= 1;
                         }
 
