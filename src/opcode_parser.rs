@@ -1,5 +1,5 @@
 use crate::chip8::Chip8;
-use rand::{Rng, prelude::ThreadRng};
+use rand::{Rng};
 
 pub fn parse_op(chip8: &mut Chip8) {
     let x = ((chip8.opcode & 0x0F00) >> 8) as usize;
@@ -16,10 +16,8 @@ pub fn parse_op(chip8: &mut Chip8) {
             // sets pc to the address at the top of the stack
             chip8.pc = chip8.jumpstack[chip8.stackpointer as usize];
             chip8.stackpointer -= 1;
-            println!("RET");
             return;
         },
-        0 => {},
         _ => {}
     }
 
@@ -61,7 +59,7 @@ pub fn parse_op(chip8: &mut Chip8) {
         }
         0x7000 => {
             // 7XNN - add NN to VX
-            chip8.vregisters[x] = chip8.vregisters[x].wrapping_add(nn);
+            chip8.vregisters[x] = (chip8.vregisters[x] as u16 + nn as u16) as u8;
             return;
         },
         0xA000 => {
