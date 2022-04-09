@@ -16,9 +16,9 @@ pub struct Rgb {
 }
 
 pub fn parse_args() -> Flags {
-    let m = Command::new("Emulator")
-    .author("Amy Y")
-    .version("0.1.0")
+    let m = Command::new(env!("CARGO_PKG_NAME"))
+    .author(env!("CARGO_PKG_AUTHORS"))
+    .version(env!("CARGO_PKG_VERSION"))
     .about("Interpretting Emulator for Chip-8")
     .arg(Arg::new("rom_path").required(true).help("The path of the ROM that is to be loaded into the emulator."))
     .arg(Arg::new("invert_colors").required(false).short('i').long("invert-colors").help("Invert colors of the screen of the emulator."))
