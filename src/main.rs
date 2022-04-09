@@ -18,7 +18,7 @@ fn main() {
     let flags = crate::args::parse_args();
 
     // setup speed
-    let runhz:u64 = 100;
+    let runhz:u64 = flags.hz;
     let delay:u64 = 1000/runhz;
     let satisfiedruntimes: u64 = (1000/60)/delay;
 
