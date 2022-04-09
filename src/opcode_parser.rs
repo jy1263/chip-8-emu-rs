@@ -240,7 +240,17 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xF00A => {
                 // FX0A - wait for keypress, store in VX
-                println!("FX0A")
+                // todo: maybe broken!
+                match chip8.keystate.iter().position(|&x| x != 0) {
+                    Some(key) => {
+                        chip8.vregisters[x as usize] = key as u8;
+                    },
+                    None => {
+                    }
+                }
+
+                chip8.pc -= 2;
+                return;
             },
             0xF015 => {
                 // FX15 - set delay timer to VX
