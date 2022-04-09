@@ -2,6 +2,8 @@ mod chip8;
 mod opcode_parser;
 mod fstools;
 
+use glium::glutin::event::{VirtualKeyCode, ElementState};
+
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
 
@@ -29,7 +31,7 @@ fn main() {
                 chip8inst.delay_timer -= 1;
             }
             if chip8inst.sound_timer > 0 {
-                chip8inst.delay_timer -= 1;
+                chip8inst.sound_timer -= 1;
             }
             runtimes = 0;
         }
@@ -64,7 +66,37 @@ fn main() {
                 },
                 glutin::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
-                    // chip8inst.keystate[0x1] = 1;
+                    let pressed = (input.state == ElementState::Pressed) as u8;
+                    match input.virtual_keycode.unwrap() {
+                        VirtualKeyCode::Key1=> {
+                            chip8inst.keystate[0x1] = pressed;
+                        },
+                        VirtualKeyCode::Key2=> {
+                            chip8inst.keystate[0x2] = pressed;
+                        },
+                        VirtualKeyCode::Key3=> {
+                            chip8inst.keystate[0x3] = pressed;
+                        },
+                        VirtualKeyCode::Key4=> {
+                            chip8inst.keystate[0xC] = pressed;
+                        },
+
+                        VirtualKeyCode::Q=> {
+                            chip8inst.keystate[0x4] = pressed;
+                        },
+                        VirtualKeyCode::W=> {
+                            chip8inst.keystate[0x5] = pressed;
+                        },
+                        VirtualKeyCode::E=> {
+                            chip8inst.keystate[0x6] = pressed;
+                        },
+                        VirtualKeyCode::R=> {
+                            chip8inst.keystate[0xD] = pressed;
+                        },
+
+
+                        _ => {}
+                    }
                 },
                 _ => return,
             },
