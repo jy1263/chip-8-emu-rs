@@ -88,7 +88,8 @@ pub fn parse_op(chip8: &mut Chip8) {
                 let vx = chip8.vregisters[x as usize];
                 let vy = chip8.vregisters[y as usize];
 
-                chip8.vregisters[15] = 0;
+                // set last register to 0
+                chip8.vregisters[0xF] = 0;
 
                 for row in 0..height {
                     // get the sprite from memory
@@ -103,9 +104,9 @@ pub fn parse_op(chip8: &mut Chip8) {
                                 32
                             ) as usize];
 
-                            // set top register to 1 if pixel is set
+                            // set last register to 1 if pixel is set
                             if *disppixel == 1 {
-                                chip8.vregisters[15] = 1;
+                                chip8.vregisters[0xF] = 1;
                             }
 
                             // toggle pixel
@@ -121,7 +122,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             _ => {}
         }
 
-        // matches first and last nibbles (ie, 0xA22A -> 0xA00A)
+        // matches first and last nibbles (ie, 0xA22A -> 0xA00A) (mostly v register operations)
         match chip8.opcode & 0xF00F {
             0x5000 => {
                 // 5XY0 - skip next instruction if VX == VY
@@ -132,23 +133,28 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0x8000 => {
                 // 8XY0 - set VX to VY
-                println!("8XY0")
+                chip8.vregisters[x as usize] = chip8.vregisters[y as usize];
+                return;
             },
             0x8001 => {
                 // 8XY1 - set VX to VX | VY
-                println!("8XY1")
+                chip8.vregisters[x as usize] |= chip8.vregisters[y as usize];
+                return;
             },
             0x8002 => {
                 // 8XY2 - set VX to VX & VY
-                println!("8XY2")
+                chip8.vregisters[x as usize] &= chip8.vregisters[y as usize];
+                return;
             },
             0x8003 => {
                 // 8XY3 - set VX to VX ^ VY
-                println!("8XY3")
+                chip8.vregisters[x as usize] ^= chip8.vregisters[y as usize];
+                return;
             },
             0x8004 => {
                 // 8XY4 - set VX to VX + VY, set VF to 1 if carry
-                println!("8XY4")
+                chip8.vregisters[x as usize] += chip8.vregisters[y as usize];
+                return;
             },
             0x8005 => {
                 // 8XY5 - set VX to VX - VY, set VF to 0 if borrow
