@@ -122,7 +122,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             _ => {}
         }
 
-        // matches first and last nibbles (ie, 0xA22A -> 0xA00A) (mostly v register operations)
+        // matches first and last nibbles (ie, 0xA22A -> 0xA00A) (mostly alu v-register operations)
         match chip8.opcode & 0xF00F {
             0x5000 => {
                 // 5XY0 - skip next instruction if VX == VY
@@ -153,12 +153,29 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0x8004 => {
                 // 8XY4 - set VX to VX + VY, set VF to 1 if carry
-                chip8.vregisters[x as usize] += chip8.vregisters[y as usize];
+                // there might be an issue here...
+
+                // Checks if the hex nibbles plussed together uses more than 8 bits, meaning it has carried over.
+                let result = chip8.vregisters[x as usize] as u16 + chip8.vregisters[y as usize] as u16;
+                if result > 0x00FF {
+                    chip8.vregisters[0xF] = 1;
+                }
+                else {
+                    chip8.vregisters[0xF] = 0;
+                }
+                chip8.vregisters[x as usize] = result as u8;
                 return;
             },
             0x8005 => {
                 // 8XY5 - set VX to VX - VY, set VF to 0 if borrow
-                println!("8XY5")
+                if chip8.vregisters[x as usize] > chip8.vregisters[y as usize] {
+                    chip8.vregisters[0xF] = 1;
+                }
+                else {
+                    chip8.vregisters[0xF] = 0;
+                }
+                chip8.vregisters[x as usize] -= chip8.vregisters[y as usize];
+                return;
             },
             0x8006 => {
                 // 8XY6 - set VX to VX >> 1, set VF to LSB of VX
