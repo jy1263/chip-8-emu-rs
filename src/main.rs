@@ -2,6 +2,7 @@ mod chip8;
 mod opcode_parser;
 mod fstools;
 mod input;
+mod args;
 
 use glium::Display;
 use glium::glutin::event::{VirtualKeyCode, ElementState};
@@ -13,13 +14,20 @@ use crate::input::parse_input;
 extern crate glium;
 
 fn main() {
+    // args
+    let flags = crate::args::parse_args();
+
+    // setup speed
     let runhz:u64 = 100;
     let delay:u64 = 1000/runhz;
     let satisfiedruntimes: u64 = (1000/60)/delay;
 
+    // setup cpu instance
     let mut chip8inst = Chip8::new();
-    chip8inst.load_program(&get_file_as_byte_vec("./roms/si.ch8"));
+    chip8inst.load_program(&get_file_as_byte_vec(flags.rom_path.as_str()));
+    chip8inst.display = [flags.invert_colors; 2048];
 
+    // setup opengl
     let mut runtimes = 0;
 
     use glium::glutin;
