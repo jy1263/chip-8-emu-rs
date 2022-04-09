@@ -7,6 +7,7 @@ pub fn parse_op(chip8: &mut Chip8) {
         let y = (chip8.opcode & 0x00F0) >> 4;
         let nn = (chip8.opcode & 0x00FF) as u8;
 
+        println!("{:X}", chip8.opcode);
         match chip8.opcode  {
             0x00E0 => {
                 chip8.display = [0; 2048];
@@ -61,7 +62,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             }
             0x7000 => {
                 // 7XNN - add NN to VX
-                chip8.vregisters[x as usize] += nn;
+                chip8.vregisters[x as usize] = chip8.vregisters[x as usize].wrapping_add(nn);
                 return;
             },
             0xA000 => {
