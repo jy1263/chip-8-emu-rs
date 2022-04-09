@@ -12,7 +12,7 @@ extern crate glium;
 
 fn main() {
     let mut chip8inst = Chip8::new();
-    chip8inst.load_program(&get_file_as_byte_vec("./roms/si.ch8"));
+    chip8inst.load_program(&get_file_as_byte_vec("./roms/bo.ch8"));
 
     let mut runtimes = 0;
 

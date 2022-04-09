@@ -23,7 +23,7 @@ static KEYMAP: [u8; 16] = [
 
 pub fn parse_input(input: KeyboardInput, chip8inst: &mut Chip8) {
     let pressed = (input.state == ElementState::Pressed) as u8;
-    match input.virtual_keycode.unwrap() {
+    match input.virtual_keycode.unwrap_or(VirtualKeyCode::L) {
         VirtualKeyCode::Key1=> {
             chip8inst.keystate[0x1] = pressed;
         },
