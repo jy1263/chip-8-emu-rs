@@ -116,6 +116,7 @@ pub fn parse_op(chip8: &mut Chip8) {
                         sprt <<= 1;
                     }
                 }
+                return;
             },
             _ => {}
         }
@@ -124,7 +125,10 @@ pub fn parse_op(chip8: &mut Chip8) {
         match chip8.opcode & 0xF00F {
             0x5000 => {
                 // 5XY0 - skip next instruction if VX == VY
-                println!("5XY0")
+                if chip8.vregisters[x as usize] == chip8.vregisters[y as usize] {
+                    chip8.pc += 2;
+                }
+                return;
             },
             0x8000 => {
                 // 8XY0 - set VX to VY

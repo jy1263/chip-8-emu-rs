@@ -9,7 +9,7 @@ extern crate glium;
 
 fn main() {
     let mut chip8inst = Chip8::new();
-    chip8inst.load_program(&get_file_as_byte_vec("./roms/ibm.ch8"));
+    chip8inst.load_program(&get_file_as_byte_vec("./roms/si.ch8"));
 
     use glium::{glutin, Surface};
 
@@ -25,7 +25,7 @@ fn main() {
         let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
         for (i, e) in  chip8inst.display.iter().enumerate() {
             if *e == 1 {
-                disptexturevec[32 - (i % 32)][i / 32] = (255u8, 255u8, 255u8);
+                disptexturevec[31 - (i % 32)][i / 32] = (255u8, 255u8, 255u8);
             }
         }
         let texture = glium::Texture2d::new(&display, disptexturevec).unwrap();
