@@ -1,5 +1,5 @@
 mod chip8;
-mod opcodes;
+mod opcode_parser;
 mod fstools;
 
 use glium::texture;
@@ -23,6 +23,7 @@ fn main() {
     event_loop.run(move |ev, _, control_flow| {
         chip8inst.single_cycle();
         
+        // render frame
         let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
         for (i, e) in  chip8inst.display.iter().enumerate() {
             if *e == 1 {
@@ -30,6 +31,7 @@ fn main() {
             }
         }
         let texture = glium::Texture2d::new(&display, disptexturevec).unwrap();
+        // get texture from display
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
