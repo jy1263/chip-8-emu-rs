@@ -82,7 +82,7 @@ pub fn parse_op(chip8: &mut Chip8) {
             0xD000 => {
                 // DXYN - draw sprite at VX, VY with N bytes of sprite data starting at I
                 let width = 8;
-                let height = chip8.opcode & 0x000F;
+                let nbytes = chip8.opcode & 0x000F;
 
                 // vregisters at x and y
                 let vx = chip8.vregisters[x as usize];
@@ -91,7 +91,7 @@ pub fn parse_op(chip8: &mut Chip8) {
                 // set last register to 0
                 chip8.vregisters[0xF] = 0;
 
-                for row in 0..height {
+                for row in 0..nbytes {
                     // get the sprite from memory
                     let mut sprt = chip8.memory[(chip8.i + row) as usize];
 
@@ -153,7 +153,6 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0x8004 => {
                 // 8XY4 - set VF to 1 if carry, set VX to VX + VY
-                // there might be an issue here...
 
                 // Checks if the hex nibbles plussed together uses more than 8 bits, meaning it has carried over.
                 let result = chip8.vregisters[x as usize] as u16 + chip8.vregisters[y as usize] as u16;
@@ -236,7 +235,8 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xF007 => {
                 // FX07 - set VX to delay timer value
-                println!("FX07")
+                chip8.vregisters[x as usize] = chip8.delay_timer;
+                return;
             },
             0xF00A => {
                 // FX0A - wait for keypress, store in VX
@@ -244,11 +244,13 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xF015 => {
                 // FX15 - set delay timer to VX
-                println!("FX15")
+                chip8.delay_timer = chip8.vregisters[x as usize];
+                return;
             },
             0xF018 => {
                 // FX18 - set sound timer to VX
-                println!("FX18")
+                chip8.sound_timer = chip8.vregisters[x as usize];
+                return;
             },
             0xF01E => {
                 // FX1E - add VX to I, set to I
@@ -257,7 +259,9 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xF029 => {
                 // FX29 - set I to location of sprite for digit VX
-                println!("FX29")
+                // multiplied by 5, as each sprite is 5 bytes long
+                chip8.i = chip8.vregisters[x as usize] as u16 * 5;
+                return;
             },
             0xF033 => {
                 // FX33 - store BCD representation of VX in memory locations I, I+1, and I+2
@@ -265,11 +269,17 @@ pub fn parse_op(chip8: &mut Chip8) {
             },
             0xF055 => {
                 // FX55 - store V0 to VX in memory starting at address I
-                println!("FX55")
+                for index in 0..x {
+                    chip8.memory[(chip8.i + index) as usize] = chip8.vregisters[index as usize];
+                }
+                return;
             },
             0xF065 => {
                 // FX65 - read V0 to VX from memory starting at address I
-                println!("FX65")
+                for index in 0..x {
+                    chip8.vregisters[index as usize] = chip8.memory[(chip8.i + index) as usize];
+                }
+                return;
             },
             _ => {}
         
