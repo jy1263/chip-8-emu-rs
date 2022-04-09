@@ -64,7 +64,7 @@ fn main() {
                 },
                 glutin::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
-                    chip8inst.keystate[0x1] = 1;
+                    // chip8inst.keystate[0x1] = 1;
                 },
                 _ => return,
             },
