@@ -152,7 +152,7 @@ pub fn parse_op(chip8: &mut Chip8) {
                 return;
             },
             0x8004 => {
-                // 8XY4 - set VX to VX + VY, set VF to 1 if carry
+                // 8XY4 - set VF to 1 if carry, set VX to VX + VY
                 // there might be an issue here...
 
                 // Checks if the hex nibbles plussed together uses more than 8 bits, meaning it has carried over.
@@ -167,31 +167,54 @@ pub fn parse_op(chip8: &mut Chip8) {
                 return;
             },
             0x8005 => {
-                // 8XY5 - set VX to VX - VY, set VF to 0 if borrow
+                // 8XY5 - set VF to 0 if borrow, set VX to VX - VY
                 if chip8.vregisters[x as usize] > chip8.vregisters[y as usize] {
                     chip8.vregisters[0xF] = 1;
                 }
                 else {
                     chip8.vregisters[0xF] = 0;
                 }
+
                 chip8.vregisters[x as usize] -= chip8.vregisters[y as usize];
                 return;
             },
             0x8006 => {
-                // 8XY6 - set VX to VX >> 1, set VF to LSB of VX
-                println!("8XY6")
+                // 8XY6 - set VF to LSB of VX, set VX to VX >> 1
+
+                // Set VF to least significant bit of VX
+                chip8.vregisters[0xF] = chip8.vregisters[x as usize] & 0x01;
+
+                chip8.vregisters[x as usize] >>= 1;
+
+                return;
             },
             0x8007 => {
                 // 8XY7 - set VX to VY - VX, set VF to 0 if borrow
-                println!("8XY7")
+                if chip8.vregisters[y as usize] > chip8.vregisters[x as usize] {
+                    chip8.vregisters[0xF] = 1;
+                }
+                else {
+                    chip8.vregisters[0xF] = 0;
+                }
+
+                chip8.vregisters[x as usize] -= chip8.vregisters[y as usize];
+                return;
             },
             0x800E => {
                 // 8XYE - set VX to VX << 1, set VF to MSB of VX
-                println!("8XYE")
+
+                // set registers by pushing unneeded bits off, and leaving with the MSB
+                chip8.vregisters[0xF] = chip8.vregisters[x as usize] >> 7;
+
+                chip8.vregisters[x as usize] <<= 1;
+                return;
             },
             0x9000 => {
                 // 9XY0 - skip next instruction if VX != VY
-                println!("9XY0")
+                if chip8.vregisters[x as usize] != chip8.vregisters[y as usize] {
+                    chip8.pc += 2;
+                }
+                return;
             },
             _ => {}
         }
