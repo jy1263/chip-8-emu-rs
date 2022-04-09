@@ -4,9 +4,7 @@ mod fstools;
 mod input;
 mod args;
 
-use glium::Display;
-use glium::glutin::event::{VirtualKeyCode, ElementState};
-
+use crate::args::Rgb;
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
 use crate::input::parse_input;
@@ -16,6 +14,7 @@ extern crate glium;
 fn main() {
     // args
     let flags = crate::args::parse_args();
+    println!("{}, {}, {}", flags.bg.r, flags.bg.g, flags.bg.b);
 
     // setup speed
     let runhz:u64 = flags.hz;
@@ -42,7 +41,7 @@ fn main() {
 
         // timer stuff
         if runtimes >= satisfiedruntimes {
-            render_texture_to_target(&chip8inst.display, &display);
+            render_texture_to_target(&chip8inst.display, &display, &flags.fg, &flags.bg);
             if chip8inst.delay_timer > 0 {
                 chip8inst.delay_timer -= 1;
             }
@@ -74,13 +73,13 @@ fn main() {
     });
 }
 
-fn render_texture_to_target(dispmem: &[u8; 2048], display: &glium::Display) {
+fn render_texture_to_target(dispmem: &[u8; 2048], display: &glium::Display, fg: &Rgb, bg: &Rgb) {
     use crate::glium::Surface;
 
-    let mut disptexturevec = vec![vec![(0u8, 0u8, 0u8); 64]; 32];
+    let mut disptexturevec = vec![vec![(bg.r, bg.g, bg.b); 64]; 32];
     for i in  0..dispmem.len() {
         if dispmem[i] == 1 {
-            disptexturevec[31 - (i % 32)][i / 32] = (255u8, 255u8, 255u8);
+            disptexturevec[31 - (i % 32)][i / 32] = (fg.r, fg.g, fg.b);
         }
     }
     let texture = glium::Texture2d::new(display, disptexturevec).unwrap();
