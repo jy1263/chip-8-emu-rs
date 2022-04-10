@@ -1,5 +1,3 @@
-use rand::prelude::ThreadRng;
-
 use crate::opcode_parser::parse_op;
 
 // 0x000-0x1FF - Chip 8 interpreter (contains font set in emu)

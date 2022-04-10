@@ -4,7 +4,7 @@ mod fstools;
 mod input;
 mod args;
 
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, RwLock};
 
 use crate::args::Rgb;
 use crate::fstools::get_file_as_byte_vec;
@@ -84,7 +84,7 @@ fn main() {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
                 },
-                glutin::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
+                glutin::event::WindowEvent::KeyboardInput { device_id: _, input, is_synthetic: _ } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
                     parse_input(input, &mut eventloopchip8.write().unwrap());
                 },

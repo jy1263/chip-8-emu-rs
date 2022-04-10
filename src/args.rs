@@ -1,5 +1,4 @@
-use crate::chip8::Chip8;
-use clap::{Parser, App, Command, Arg};
+use clap::{Command, Arg};
 
 pub struct Flags {
     pub invert_colors: u8,

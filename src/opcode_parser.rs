@@ -1,6 +1,5 @@
-use std::sync::Mutex;
 use crate::chip8::Chip8;
-use rand::{Rng, prelude::ThreadRng};
+use rand::Rng;
 
 pub fn parse_op(chip8: &mut Chip8) {
     let x = ((chip8.opcode & 0x0F00) >> 8) as usize;
