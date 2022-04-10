@@ -19,7 +19,7 @@ fn main() {
 
     // setup speed
     // devide 2 as fetch and decode is on same loop
-    let runhz:u64 = flags.hz/2;
+    let runhz:u64 = flags.hz;
     let delay:u64 = 1000/runhz;
     let satisfiedruntimes: u64 = (1000/60)/delay;
 
@@ -29,9 +29,9 @@ fn main() {
     chip8inst.display = [flags.invert_colors; 2048];
     let chip8arc = Arc::new(RwLock::new(chip8inst));
 
-    let mut runtimes = 0;
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
+        let mut runtimes = 0;
         while true {
             let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
 
@@ -47,11 +47,15 @@ fn main() {
             }
             runtimes += 1;
 
+
             // cycle cpu
             loopchip8.write().unwrap().single_cycle();
 
             if next_frame_time > std::time::Instant::now() {
                 std::thread::sleep(next_frame_time - std::time::Instant::now());
+            }
+            else {
+                println!("frame took longer than expected");
             }
         }
     });
@@ -63,11 +67,15 @@ fn main() {
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
     let eventloopchip8 = chip8arc.clone();
+    let mut last_next_frame_time = std::time::Instant::now();
 
     event_loop.run(move |ev, _, control_flow| {
         let next_frame_time = std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
-
-        render_texture_to_target(&eventloopchip8.read().unwrap().display, &display, &flags.fg, &flags.bg);
+        
+        if last_next_frame_time <= std::time::Instant::now() {
+            render_texture_to_target(&eventloopchip8.read().unwrap().display, &display, &flags.fg, &flags.bg);
+            last_next_frame_time = next_frame_time;
+        }
 
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
         match ev {
