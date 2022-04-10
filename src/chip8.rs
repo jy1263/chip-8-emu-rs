@@ -51,9 +51,6 @@ pub struct Chip8 {
     pub keystate: [u8; 16],
 
     pub display: [u8; 2048],
-
-    // tools
-    pub rng: ThreadRng
 }
 
 impl Chip8 {
@@ -69,8 +66,7 @@ impl Chip8 {
             jumpstack: [0; 16],
             stackpointer: 0,
             keystate: [0; 16],
-            display: [0; 2048],
-            rng: rand::thread_rng()
+            display: [0; 2048]
         };
         chip8.load_fontset();
         chip8
