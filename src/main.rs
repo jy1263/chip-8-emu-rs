@@ -4,6 +4,8 @@ mod fstools;
 mod input;
 mod args;
 
+use std::sync::{Arc, Mutex, RwLock};
+
 use crate::args::Rgb;
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
@@ -25,35 +27,48 @@ fn main() {
     let mut chip8inst = Chip8::new();
     chip8inst.load_program(&get_file_as_byte_vec(flags.rom_path.as_str()));
     chip8inst.display = [flags.invert_colors; 2048];
+    let chip8arc = Arc::new(RwLock::new(chip8inst));
+
+    let mut runtimes = 0;
+    let loopchip8 = chip8arc.clone();
+    std::thread::spawn(move || {
+        while true {
+            let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
+
+            // timer stuff
+            if runtimes >= satisfiedruntimes {
+                if loopchip8.read().unwrap().delay_timer > 0 {
+                    loopchip8.write().unwrap().delay_timer -= 1;
+                }
+                if loopchip8.read().unwrap().sound_timer > 0 {
+                    loopchip8.write().unwrap().sound_timer -= 1;
+                }
+                runtimes = 0;
+            }
+            runtimes += 1;
+
+            // cycle cpu
+            loopchip8.write().unwrap().single_cycle();
+
+            if next_frame_time > std::time::Instant::now() {
+                std::thread::sleep(next_frame_time - std::time::Instant::now());
+            }
+        }
+    });
 
     // setup opengl
-    let mut runtimes = 0;
-
     use glium::glutin;
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+    let eventloopchip8 = chip8arc.clone();
 
     event_loop.run(move |ev, _, control_flow| {
-        let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
+        let next_frame_time = std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
 
-        // timer stuff
-        if runtimes >= satisfiedruntimes {
-            render_texture_to_target(&chip8inst.display, &display, &flags.fg, &flags.bg);
-            if chip8inst.delay_timer > 0 {
-                chip8inst.delay_timer -= 1;
-            }
-            if chip8inst.sound_timer > 0 {
-                chip8inst.sound_timer -= 1;
-            }
-            runtimes = 0;
-        }
-        runtimes += 1;
+        render_texture_to_target(&eventloopchip8.read().unwrap().display, &display, &flags.fg, &flags.bg);
 
-        // cycle cpu
-        chip8inst.single_cycle();
-        
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
         match ev {
             glutin::event::Event::WindowEvent { event, .. } => match event {
@@ -63,7 +78,7 @@ fn main() {
                 },
                 glutin::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
-                    parse_input(input, &mut chip8inst);
+                    parse_input(input, &mut eventloopchip8.write().unwrap());
                 },
                 _ => return,
             },
