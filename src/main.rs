@@ -16,7 +16,8 @@ fn main() {
     let flags = crate::args::parse_args();
 
     // setup speed
-    let runhz:u64 = flags.hz;
+    // devide 2 as fetch and decode is on same loop
+    let runhz:u64 = flags.hz/2;
     let delay:u64 = 1000/runhz;
     let satisfiedruntimes: u64 = (1000/60)/delay;
 
@@ -35,7 +36,6 @@ fn main() {
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     event_loop.run(move |ev, _, control_flow| {
-        // set next run time to 1 second / 500hz =  2 milliseconds.
         let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
 
         // timer stuff

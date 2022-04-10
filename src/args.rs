@@ -22,7 +22,7 @@ pub fn parse_args() -> Flags {
     .about("Interpretting Emulator for Chip-8")
     .arg(Arg::new("rom_path").required(true).help("The path of the ROM that is to be loaded into the emulator."))
     .arg(Arg::new("invert_colors").required(false).short('i').long("invert-colors").help("Invert colors of the screen of the emulator."))
-    .arg(Arg::new("hz").required(false).short('h').long("hz").help("The amount of loops that the emulator runs in one second.").default_value("300"))
+    .arg(Arg::new("hz").required(false).short('h').long("hz").help("The amount of loops that the emulator runs in one second.").default_value("500"))
     .arg(Arg::new("foreground_color").required(false).short('f').long("fg").help("The color in Hex that will be the foreground color.").default_value("FFFFFF"))
     .arg(Arg::new("background_color").required(false).short('b').long("bg").help("The color in Hex that will be the background color.").default_value("000000"))
     .get_matches();
