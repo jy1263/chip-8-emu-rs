@@ -20,14 +20,31 @@ pub fn parse_args() -> Flags {
     .author(env!("CARGO_PKG_AUTHORS"))
     .version(env!("CARGO_PKG_VERSION"))
     .about("Interpretting Emulator for Chip-8")
+
     .arg(Arg::new("rom_path").required(true).help("The path of the ROM that is to be loaded into the emulator."))
     .arg(Arg::new("invert_colors").required(false).short('i').long("invert-colors").help("Invert colors of the screen of the emulator."))
     .arg(Arg::new("hz").required(false).short('h').long("hz").help("The amount of loops that the emulator runs in one second.").default_value("500"))
     .arg(Arg::new("foreground_color").required(false).short('f').long("fg").help("The color in Hex that will be the foreground color.").default_value("FFFFFF"))
     .arg(Arg::new("background_color").required(false).short('b').long("bg").help("The color in Hex that will be the background color.").default_value("000000"))
     .arg(Arg::new("volume").required(false).short('v').long("volume").help("Volume of the beep as a float.").default_value("0.2"))
+    .before_help("
+Keybindings:
+
+- F5 for saving state.
+- F6 for loading state.
+
+Keypad:        Keyboard:
+---------      ---------
+|1|2|3|C|      |1|2|3|4|
+---------      ---------
+|4|5|6|D|      |Q|W|E|R|
+---------  =>  ---------
+|7|8|9|E|      |A|S|D|F|
+---------      ---------
+|A|0|B|F|      |Z|X|C|V|
+---------      ---------")
     .get_matches();
-    
+
     return Flags {
         invert_colors: m.is_present("invert_colors") as u8,
         rom_path: m.value_of("rom_path").unwrap().to_string(),
