@@ -1,9 +1,9 @@
 use std::{thread::{Thread, JoinHandle}, time::Duration, sync::{Arc, RwLock}, os::windows::thread};
 
-use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, SampleFormat, Sample, StreamError, Stream};
+use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, SampleFormat, Sample, StreamError, Stream, BuildStreamError};
 
 pub struct Beeper {
-    pub playing: Arc<RwLock<bool>>
+    pub stream: Option<Stream>
 }
 impl Beeper {
     pub fn new() -> Self {
@@ -17,24 +17,38 @@ impl Beeper {
         let config = supported_config.config();
         let sample_format = supported_config.sample_format();
 
-        let beepinst = Beeper {
-            playing: Arc::new(RwLock::new(false)),
+        let streamres = match sample_format {
+            SampleFormat::F32 => run::<f32>(&device, &config),
+            SampleFormat::I16 => run::<i16>(&device, &config),
+            SampleFormat::U16 => run::<u16>(&device, &config),
         };
-
-        let playingref = beepinst.playing.clone();
-        std::thread::spawn(move || {
-            let stream = match sample_format {
-                SampleFormat::F32 => run::<f32>(&device, &config, playingref),
-                SampleFormat::I16 => run::<i16>(&device, &config, playingref),
-                SampleFormat::U16 => run::<u16>(&device, &config, playingref),
-            }.unwrap();
-        });
-        
-        return beepinst;
+        match streamres {
+            Ok(stream) => {
+                return Beeper {
+                    stream: Some(stream)
+                }
+            },
+            Err(e) => {
+                println!("audio could not be initialized");
+                return Beeper {
+                    stream: None
+                }
+            }
+        }
+    }
+    pub fn play(&self) {
+        if self.stream.is_some() {
+            self.stream.as_ref().unwrap().play().unwrap();
+        }
+    }
+    pub fn pause(&self) {
+        if self.stream.is_some() {
+            self.stream.as_ref().unwrap().pause().unwrap();
+        }
     }
 }
 
-pub fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig, playing: Arc<RwLock<bool>>) -> Result<(), std::io::Error>
+pub fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<Stream, BuildStreamError>
 where
     T: cpal::Sample,
 {
@@ -56,17 +70,8 @@ where
             write_data(data, channels, &mut next_value)
         },
         err_fn,
-    ).unwrap();
-    loop {
-        if *playing.read().unwrap() {
-            stream.play().unwrap();
-        }
-        else {
-            stream.pause().unwrap();
-        }
-        std::thread::sleep(Duration::from_nanos(16_666_667));
-    }
-    Ok(())
+    );
+    return stream;
 }
 
 fn write_data<T>(output: &mut [T], channels: usize, next_sample: &mut dyn FnMut() -> f32)

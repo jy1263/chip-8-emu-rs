@@ -7,6 +7,8 @@ mod args;
 
 use std::sync::{Arc, RwLock};
 
+use cpal::traits::StreamTrait;
+
 use crate::args::Rgb;
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
@@ -19,7 +21,6 @@ extern crate savefile;
 extern crate glium;
 
 fn main() {
-    let mut beeper = crate::audio::Beeper::new();
 
     // args
     let flags = crate::args::parse_args();
@@ -38,6 +39,7 @@ fn main() {
 
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
+        let beeper = crate::audio::Beeper::new();
         let mut runtimes = 0;
         loop {
             let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
@@ -48,11 +50,11 @@ fn main() {
                     loopchip8.write().unwrap().delay_timer -= 1;
                 }
                 if loopchip8.read().unwrap().sound_timer > 0 {
-                    *beeper.playing.write().unwrap() = true;
+                    beeper.play();
                     loopchip8.write().unwrap().sound_timer -= 1;
                 }
                 else {
-                    *beeper.playing.write().unwrap() = false;
+                    beeper.pause()
                 }
                 runtimes = 0;
             }
