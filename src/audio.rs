@@ -8,7 +8,7 @@ pub struct Beeper {
 impl Beeper {
     pub fn new(vol: f32) -> Result<Self, Box<dyn Error>>  {
         let host = cpal::default_host();
-        let device = host.default_output_device().expect("no output device available");
+        let device = host.default_output_device().ok_or(std::fmt::Error {})?;
         let supported_config = device.supported_output_configs()?.next().ok_or(std::fmt::Error {})?.with_max_sample_rate();
         let config = supported_config.config();
         let sample_format = supported_config.sample_format();
