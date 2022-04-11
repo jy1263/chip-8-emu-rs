@@ -2,6 +2,7 @@ mod chip8;
 mod opcode_parser;
 mod fstools;
 mod input;
+mod audio;
 mod args;
 
 use std::sync::{Arc, RwLock};
@@ -18,6 +19,8 @@ extern crate savefile;
 extern crate glium;
 
 fn main() {
+    let mut beeper = crate::audio::Beeper::new();
+
     // args
     let flags = crate::args::parse_args();
 
@@ -45,7 +48,11 @@ fn main() {
                     loopchip8.write().unwrap().delay_timer -= 1;
                 }
                 if loopchip8.read().unwrap().sound_timer > 0 {
+                    *beeper.playing.write().unwrap() = true;
                     loopchip8.write().unwrap().sound_timer -= 1;
+                }
+                else {
+                    *beeper.playing.write().unwrap() = false;
                 }
                 runtimes = 0;
             }
