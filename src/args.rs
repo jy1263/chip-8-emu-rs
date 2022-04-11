@@ -21,7 +21,7 @@ pub fn parse_args() -> Flags {
     .version(env!("CARGO_PKG_VERSION"))
     .about("Interpretting Emulator for Chip-8")
 
-    .arg(Arg::new("rom_path").required(true).help("The path of the ROM that is to be loaded into the emulator."))
+    .arg(Arg::new("rom_path").required(true).help("The path of the ROM that is to be loaded into the emulator. If a '.state' file is loaded, the emulator will resume from that save state."))
     .arg(Arg::new("invert_colors").required(false).short('i').long("invert-colors").help("Invert colors of the screen of the emulator."))
     .arg(Arg::new("hz").required(false).short('h').long("hz").help("The amount of loops that the emulator runs in one second.").default_value("500"))
     .arg(Arg::new("foreground_color").required(false).short('f').long("fg").help("The color in Hex that will be the foreground color.").default_value("FFFFFF"))
