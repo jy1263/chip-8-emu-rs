@@ -36,7 +36,7 @@ fn main() {
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
         let mut runtimes = 0;
-        while true {
+        loop {
             let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
 
             // timer stuff
