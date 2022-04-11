@@ -27,9 +27,7 @@ pub fn parse_args() -> Flags {
     .arg(Arg::new("background_color").required(false).short('b').long("bg").help("The color in Hex that will be the background color.").default_value("000000"))
     .arg(Arg::new("volume").required(false).short('v').long("volume").help("Volume of the beep as a float.").default_value("0.2"))
     .get_matches();
-
-    println!("{}", m.value_of("volume").unwrap().parse::<f32>().unwrap());
-
+    
     return Flags {
         invert_colors: m.is_present("invert_colors") as u8,
         rom_path: m.value_of("rom_path").unwrap().to_string(),
