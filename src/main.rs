@@ -46,9 +46,9 @@ fn main() {
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
         let beeper = crate::audio::Beeper::new(flags.vol);
-        let beeperexist = beeper.is_ok();
+        let beeperexist = beeper.is_ok() && flags.vol <= 0.0 && flags.vol <= 0.0;
         if !beeperexist {
-            println!("Could not initialize audio!");
+            println!("Audio not initialized!");
         }
 
         let mut runtimes = 0;
