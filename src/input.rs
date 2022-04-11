@@ -1,6 +1,6 @@
 use glium::glutin::event::{KeyboardInput, ElementState, VirtualKeyCode};
 
-use crate::chip8::Chip8;
+use crate::{chip8::Chip8, args::Flags, fstools::{self, load_state}};
 
 static KEYMAP: [usize; 16] = [
     0x1, // 1
@@ -21,7 +21,7 @@ static KEYMAP: [usize; 16] = [
     0xF, // F
 ];
 
-pub fn parse_input(input: KeyboardInput, chip8inst: &mut Chip8) {
+pub fn parse_input(input: KeyboardInput, chip8inst: &mut Chip8, flags: &Flags) {
     let pressed = (input.state == ElementState::Pressed) as u8;
     match input.virtual_keycode.unwrap_or(VirtualKeyCode::L) {
         VirtualKeyCode::Key1=> {
@@ -76,6 +76,25 @@ pub fn parse_input(input: KeyboardInput, chip8inst: &mut Chip8) {
             chip8inst.keystate[KEYMAP[15]] = pressed;
         },
 
+
+
+        // save state
+        VirtualKeyCode::F5 => {
+            if pressed == 1 {
+                let rompath = std::path::Path::new(flags.rom_path.as_str());
+                let statepath = rompath.with_extension("state");
+
+                fstools::save_state(&statepath, chip8inst);
+            }
+        },
+        VirtualKeyCode::F6 => {
+            if pressed == 1 {
+                let rompath = std::path::Path::new(flags.rom_path.as_str());
+                let statepath = rompath.with_extension("state");
+
+                load_state(&statepath, chip8inst)
+            }
+        },
         _ => {}
     }
 }
