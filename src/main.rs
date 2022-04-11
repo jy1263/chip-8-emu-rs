@@ -40,22 +40,30 @@ fn main() {
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
         let beeper = crate::audio::Beeper::new();
+        let beeperexist = beeper.is_ok();
+        if !beeperexist {
+            println!("Could not initialize audio!");
+        }
+
         let mut runtimes = 0;
         loop {
             let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
-
+            
             // timer stuff
             if runtimes >= satisfiedruntimes {
                 if loopchip8.read().unwrap().delay_timer > 0 {
                     loopchip8.write().unwrap().delay_timer -= 1;
                 }
                 if loopchip8.read().unwrap().sound_timer > 0 {
-                    beeper.play();
+                    if beeperexist {
+                        beeper.as_ref().unwrap().play();
+                    }
                     loopchip8.write().unwrap().sound_timer -= 1;
                 }
-                else {
-                    beeper.pause()
+                else if beeperexist {
+                    beeper.as_ref().unwrap().pause();
                 }
+                
                 runtimes = 0;
             }
             runtimes += 1;

@@ -1,19 +1,15 @@
-use std::{thread::{Thread, JoinHandle}, time::Duration, sync::{Arc, RwLock}, os::windows::thread};
+use std::{thread::{Thread, JoinHandle}, time::Duration, sync::{Arc, RwLock}, os::windows::thread, error::Error};
 
 use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, SampleFormat, Sample, StreamError, Stream, BuildStreamError};
 
 pub struct Beeper {
-    pub stream: Option<Stream>
+    pub stream: Stream
 }
 impl Beeper {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, Box<dyn Error>>  {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("no output device available");
-        let mut supported_configs_range = device.supported_output_configs()
-        .expect("error while querying configs");
-        let supported_config = supported_configs_range.next()
-            .expect("no supported config?!")
-            .with_max_sample_rate();
+        let supported_config = device.supported_output_configs()?.next().ok_or(std::fmt::Error {})?.with_max_sample_rate();
         let config = supported_config.config();
         let sample_format = supported_config.sample_format();
 
@@ -21,30 +17,16 @@ impl Beeper {
             SampleFormat::F32 => run::<f32>(&device, &config),
             SampleFormat::I16 => run::<i16>(&device, &config),
             SampleFormat::U16 => run::<u16>(&device, &config),
-        };
-        match streamres {
-            Ok(stream) => {
-                return Beeper {
-                    stream: Some(stream)
-                }
-            },
-            Err(e) => {
-                println!("audio could not be initialized");
-                return Beeper {
-                    stream: None
-                }
-            }
-        }
+        }?;
+        return Ok(Self {
+            stream: streamres
+        });
     }
     pub fn play(&self) {
-        if self.stream.is_some() {
-            self.stream.as_ref().unwrap().play().unwrap();
-        }
+        self.stream.play().unwrap();
     }
     pub fn pause(&self) {
-        if self.stream.is_some() {
-            self.stream.as_ref().unwrap().pause().unwrap();
-        }
+        self.stream.pause().unwrap();
     }
 }
 
