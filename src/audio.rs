@@ -1,6 +1,6 @@
-use std::{thread::{Thread, JoinHandle}, time::Duration, sync::{Arc, RwLock}, os::windows::thread, error::Error};
+use std::error::Error;
 
-use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, SampleFormat, Sample, StreamError, Stream, BuildStreamError};
+use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, SampleFormat, Stream, BuildStreamError};
 
 pub struct Beeper {
     pub stream: Stream

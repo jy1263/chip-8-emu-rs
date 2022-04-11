@@ -7,8 +7,6 @@ mod args;
 
 use std::sync::{Arc, RwLock};
 
-use cpal::traits::StreamTrait;
-
 use crate::args::Rgb;
 use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
