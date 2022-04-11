@@ -23,6 +23,7 @@ static FONTSET: [u8; 80] = [
 	0xF0, 0x80, 0xF0, 0x80, 0x80		// F
 ];
 
+#[derive(Savefile)]
 pub struct Chip8 {
     
     // current opcode

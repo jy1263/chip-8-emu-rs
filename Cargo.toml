@@ -10,3 +10,6 @@ authors = ["Amy Y"]
 glium = "*"
 rand = "0.8.5"
 clap = { version = "3.1.8", features = ["derive"] }
+
+savefile="0.10"
+savefile-derive="0.10"

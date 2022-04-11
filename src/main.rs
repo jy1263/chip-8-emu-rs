@@ -11,6 +11,10 @@ use crate::fstools::get_file_as_byte_vec;
 use crate::chip8::Chip8;
 use crate::input::parse_input;
 
+#[macro_use]
+extern crate savefile_derive;
+extern crate savefile;
+
 extern crate glium;
 
 fn main() {
@@ -32,7 +36,7 @@ fn main() {
     let loopchip8 = chip8arc.clone();
     std::thread::spawn(move || {
         let mut runtimes = 0;
-        while true {
+        loop {
             let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(delay);
 
             // timer stuff
@@ -53,9 +57,6 @@ fn main() {
 
             if next_frame_time > std::time::Instant::now() {
                 std::thread::sleep(next_frame_time - std::time::Instant::now());
-            }
-            else {
-                println!("frame took longer than expected");
             }
         }
     });
@@ -86,7 +87,7 @@ fn main() {
                 },
                 glutin::event::WindowEvent::KeyboardInput { device_id: _, input, is_synthetic: _ } => {
                     // println!("{:?}", input.virtual_keycode.unwrap());
-                    parse_input(input, &mut eventloopchip8.write().unwrap());
+                    parse_input(input, &mut eventloopchip8.write().unwrap(), &flags);
                 },
                 _ => return,
             },
