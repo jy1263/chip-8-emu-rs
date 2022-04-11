@@ -31,8 +31,16 @@ fn main() {
 
     // setup cpu instance
     let mut chip8inst = Chip8::new();
-    chip8inst.load_program(&get_file_as_byte_vec(flags.rom_path.as_str()));
     chip8inst.display = [flags.invert_colors; 2048];
+
+    // load rom/state into chip8inst
+    let rompath = flags.rom_path.as_str();
+    if rompath.ends_with(".state") {
+        crate::fstools::load_state(&std::path::Path::new(rompath).to_path_buf(), &mut chip8inst)
+    }
+    else {
+        chip8inst.load_program(&get_file_as_byte_vec(rompath));
+    }
     let chip8arc = Arc::new(RwLock::new(chip8inst));
 
     let loopchip8 = chip8arc.clone();
