@@ -5,7 +5,8 @@ pub struct Flags {
     pub rom_path: String,
     pub hz: u64,
     pub fg: Rgb,
-    pub bg: Rgb
+    pub bg: Rgb,
+    pub vol: f32
 }
 
 pub struct Rgb {
@@ -24,7 +25,10 @@ pub fn parse_args() -> Flags {
     .arg(Arg::new("hz").required(false).short('h').long("hz").help("The amount of loops that the emulator runs in one second.").default_value("500"))
     .arg(Arg::new("foreground_color").required(false).short('f').long("fg").help("The color in Hex that will be the foreground color.").default_value("FFFFFF"))
     .arg(Arg::new("background_color").required(false).short('b').long("bg").help("The color in Hex that will be the background color.").default_value("000000"))
+    .arg(Arg::new("volume").required(false).short('v').long("volume").help("Volume of the beep as a float.").default_value("0.2"))
     .get_matches();
+
+    println!("{}", m.value_of("volume").unwrap().parse::<f32>().unwrap());
 
     return Flags {
         invert_colors: m.is_present("invert_colors") as u8,
@@ -32,6 +36,7 @@ pub fn parse_args() -> Flags {
         hz: m.value_of("hz").unwrap().parse::<u64>().unwrap(),
         fg: hex_to_rgb(u32::from_str_radix(m.value_of("foreground_color").unwrap(), 16).unwrap()),
         bg: hex_to_rgb(u32::from_str_radix(m.value_of("background_color").unwrap(), 16).unwrap()),
+        vol: m.value_of("volume").unwrap().parse::<f32>().unwrap()
     };
 }
 

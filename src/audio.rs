@@ -6,7 +6,7 @@ pub struct Beeper {
     pub stream: Stream
 }
 impl Beeper {
-    pub fn new() -> Result<Self, Box<dyn Error>>  {
+    pub fn new(vol: f32) -> Result<Self, Box<dyn Error>>  {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("no output device available");
         let supported_config = device.supported_output_configs()?.next().ok_or(std::fmt::Error {})?.with_max_sample_rate();
@@ -14,9 +14,9 @@ impl Beeper {
         let sample_format = supported_config.sample_format();
 
         let streamres = match sample_format {
-            SampleFormat::F32 => run::<f32>(&device, &config),
-            SampleFormat::I16 => run::<i16>(&device, &config),
-            SampleFormat::U16 => run::<u16>(&device, &config),
+            SampleFormat::F32 => run::<f32>(&device, &config, vol),
+            SampleFormat::I16 => run::<i16>(&device, &config, vol),
+            SampleFormat::U16 => run::<u16>(&device, &config, vol),
         }?;
         return Ok(Self {
             stream: streamres
@@ -30,7 +30,7 @@ impl Beeper {
     }
 }
 
-pub fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<Stream, BuildStreamError>
+pub fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig, vol: f32) -> Result<Stream, BuildStreamError>
 where
     T: cpal::Sample,
 {
@@ -41,7 +41,7 @@ where
     let mut sample_clock = 0f32;
     let mut next_value = move || {
         sample_clock = (sample_clock + 1.0) % sample_rate;
-        (sample_clock * 440.0 * 2.0 * std::f32::consts::PI / sample_rate).sin() / 20.0
+        ((sample_clock * 440.0 * 2.0 * std::f32::consts::PI / sample_rate).sin() / 6.0) * vol
     };
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
